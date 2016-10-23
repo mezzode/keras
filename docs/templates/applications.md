@@ -7,19 +7,25 @@ Weights are downloaded automatically when instantiating a model. They are stored
 
 ## Available models
 
-Models for image classification with weights trained on ImageNet:
+### Models for image classification with weights trained on ImageNet:
 
+- [Xception](#xception)
 - [VGG16](#vgg16)
 - [VGG19](#vgg19)
 - [ResNet50](#resnet50)
 - [InceptionV3](#inceptionv3)
-- [MusicTaggerCRNN](#musictaggercrnn)
 
-All of these architectures are compatible with both TensorFlow and Theano, and upon instantiation the models will be built according to the image dimension ordering set in your Keras configuration file at `~/.keras/keras.json`. For instance, if you have set `image_dim_ordering=tf`, then any model loaded from this repository will get built according to the TensorFlow dimension ordering convention, "Width-Height-Depth".
+All of these architectures (except Xception) are compatible with both TensorFlow and Theano, and upon instantiation the models will be built according to the image dimension ordering set in your Keras configuration file at `~/.keras/keras.json`. For instance, if you have set `image_dim_ordering=tf`, then any model loaded from this repository will get built according to the TensorFlow dimension ordering convention, "Width-Height-Depth".
+
+The Xception model is only available for TensorFlow, due to its reliance on `SeparableConvolution` layers.
+
+### Model for music audio file auto-tagging (taking as input Mel-spectrograms):
+
+- [MusicTaggerCRNN](#musictaggercrnn)
 
 -----
 
-## Examples
+## Usage examples for image classification models
 
 ### Classify ImageNet classes with ResNet50
 
@@ -157,47 +163,72 @@ input_tensor = Input(shape=(224, 224, 3))  # this assumes K.image_dim_ordering()
 model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=True)
 ```
 
+-----
 
-### Music tagging and feature extraction with MusicTaggerCRNN
+# Documentation for individual models
+
+- [Xception](#xception)
+- [VGG16](#vgg16)
+- [VGG19](#vgg19)
+- [ResNet50](#resnet50)
+- [InceptionV3](#inceptionv3)
+- [MusicTaggerCRNN](#musictaggercrnn)
+
+-----
+
+
+## Xception
+
 
 ```python
-from keras.applications.music_tagger_crnn import MusicTaggerCRNN
-from keras.applications.music_tagger_crnn import preprocess_input, decode_predictions
-import numpy as np
-
-# 1. Tagging
-model = MusicTaggerCRNN(weights='msd')
-
-audio_path = 'audio_file.mp3'
-melgram = preprocess_input(audio_path)
-melgrams = np.expand_dims(melgram, axis=0)
-
-preds = model.predict(melgrams)
-print('Predicted:')
-print(decode_predictions(preds))
-# print: ('Predicted:', [[('rock', 0.097071797), ('pop', 0.042456303), ('alternative', 0.032439161), ('indie', 0.024491295), ('female vocalists', 0.016455274)]])
-
-#. 2. Feature extraction
-model = MusicTaggerCRNN(weights='msd', include_top=False)
-
-audio_path = 'audio_file.mp3'
-melgram = preprocess_input(audio_path)
-melgrams = np.expand_dims(melgram, axis=0)
-
-feats = model.predict(melgrams)
-print('Features:')
-print(feats[0, :10])
-# print: ('Features:', [-0.19160545 0.94259131 -0.9991011 0.47644514 -0.19089699 0.99033844 0.1103896 -0.00340496 0.14823607 0.59856361])
+keras.applications.xception.Xception(include_top=True, weights='imagenet', input_tensor=None)
 ```
+
+Xception V1 model, with weights pre-trained on ImageNet.
+
+On ImageNet, this model gets to a top-1 validation accuracy of 0.790
+and a top-5 validation accuracy of 0.945.
+
+Note that this model is only available for the TensorFlow backend,
+due to its reliance on `SeparableConvolution` layers. Additionally it only supports
+the dimension ordering "tf" (width, height, channels).
+
+The default input size for this model is 299x299.
+
+### Arguments
+
+- include_top: whether to include the fully-connected layer at the top of the network.
+- weights: one of `None` (random initialization) or "imagenet" (pre-training on ImageNet).
+- input_tensor: optional Keras tensor (i.e. output of `layers.Input()`) to use as image input for the model.
+
+### Returns
+
+A Keras model instance.
+
+### References
+
+- [Xception: Deep Learning with Depthwise Separable Convolutions](https://arxiv.org/abs/1610.02357)
+
+### License
+
+These weights are trained by ourselves and are released under the MIT license.
 
 
 -----
+
 
 ## VGG16
 
 ```python
 keras.applications.vgg16.VGG16(include_top=True, weights='imagenet', input_tensor=None)
 ```
+
+VGG16 model, with weights pre-trained on ImageNet.
+
+This model is available for both the Theano and TensorFlow backend, and can be built both
+with "th" dim ordering (channels, width, height) or "tf" dim ordering (width, height, channels).
+
+The default input size for this model is 224x224.
 
 ### Arguments
 
@@ -225,6 +256,14 @@ These weights are ported from the ones [released by VGG at Oxford](http://www.ro
 ```python
 keras.applications.vgg19.VGG19(include_top=True, weights='imagenet', input_tensor=None)
 ```
+
+
+VGG19 model, with weights pre-trained on ImageNet.
+
+This model is available for both the Theano and TensorFlow backend, and can be built both
+with "th" dim ordering (channels, width, height) or "tf" dim ordering (width, height, channels).
+
+The default input size for this model is 224x224.
 
 ### Arguments
 
@@ -254,9 +293,18 @@ These weights are ported from the ones [released by VGG at Oxford](http://www.ro
 keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet', input_tensor=None)
 ```
 
+
+ResNet50 model, with weights pre-trained on ImageNet.
+
+This model is available for both the Theano and TensorFlow backend, and can be built both
+with "th" dim ordering (channels, width, height) or "tf" dim ordering (width, height, channels).
+
+The default input size for this model is 224x224.
+
+
 ### Arguments
 
-- include_top: whether to include the 3 fully-connected layers at the top of the network.
+- include_top: whether to include the fully-connected layer at the top of the network.
 - weights: one of `None` (random initialization) or "imagenet" (pre-training on ImageNet).
 - input_tensor: optional Keras tensor (i.e. output of `layers.Input()`) to use as image input for the model.
 
@@ -281,9 +329,17 @@ These weights are ported from the ones [released by Kaiming He](https://github.c
 keras.applications.inception_v3.InceptionV3(include_top=True, weights='imagenet', input_tensor=None)
 ```
 
+Inception V3 model, with weights pre-trained on ImageNet.
+
+This model is available for both the Theano and TensorFlow backend, and can be built both
+with "th" dim ordering (channels, width, height) or "tf" dim ordering (width, height, channels).
+
+The default input size for this model is 299x299.
+
+
 ### Arguments
 
-- include_top: whether to include the 3 fully-connected layers at the top of the network.
+- include_top: whether to include the fully-connected layer at the top of the network.
 - weights: one of `None` (random initialization) or "imagenet" (pre-training on ImageNet).
 - input_tensor: optional Keras tensor (i.e. output of `layers.Input()`) to use as image input for the model.
 
@@ -327,3 +383,35 @@ A Keras model instance.
 ### License
 
 These weights are ported from the ones [released by Keunwoo Choi](https://github.com/keunwoochoi/music-auto_tagging-keras) under the [MIT license](https://github.com/keunwoochoi/music-auto_tagging-keras/blob/master/LICENSE.md).
+
+### Examples: music tagging and audio feature extraction
+
+```python
+from keras.applications.music_tagger_crnn import MusicTaggerCRNN
+from keras.applications.music_tagger_crnn import preprocess_input, decode_predictions
+import numpy as np
+
+# 1. Tagging
+model = MusicTaggerCRNN(weights='msd')
+
+audio_path = 'audio_file.mp3'
+melgram = preprocess_input(audio_path)
+melgrams = np.expand_dims(melgram, axis=0)
+
+preds = model.predict(melgrams)
+print('Predicted:')
+print(decode_predictions(preds))
+# print: ('Predicted:', [[('rock', 0.097071797), ('pop', 0.042456303), ('alternative', 0.032439161), ('indie', 0.024491295), ('female vocalists', 0.016455274)]])
+
+#. 2. Feature extraction
+model = MusicTaggerCRNN(weights='msd', include_top=False)
+
+audio_path = 'audio_file.mp3'
+melgram = preprocess_input(audio_path)
+melgrams = np.expand_dims(melgram, axis=0)
+
+feats = model.predict(melgrams)
+print('Features:')
+print(feats[0, :10])
+# print: ('Features:', [-0.19160545 0.94259131 -0.9991011 0.47644514 -0.19089699 0.99033844 0.1103896 -0.00340496 0.14823607 0.59856361])
+```

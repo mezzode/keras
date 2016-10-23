@@ -1106,10 +1106,10 @@ class Merge(Layer):
 
     ```python
     model1 = Sequential()
-    model1.add(Dense(32))
+    model1.add(Dense(32, input_dim=32))
 
     model2 = Sequential()
-    model2.add(Dense(32))
+    model2.add(Dense(32, input_dim=32))
 
     merged_model = Sequential()
     merged_model.add(Merge([model1, model2], mode='concat', concat_axis=1)
